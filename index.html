@@ -1,0 +1,163 @@
+<title>Redutor de Velocidade A3</title>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: prancha técnica — menu lateral com as peças, painel com folha do desenho, medidas e seletor de vistas da montagem */
+:root{--bg:#f2f5f9;--panel:#ffffff;--ink:#12233a;--mute:#5a6b82;--line:#cdd7e4;--accent:#1f7fd1;--dim:#c2700a;--grid:rgba(31,127,209,.07);--shade:#e6edf6;--onaccent:#ffffff;
+--f-d:'Barlow Condensed','Arial Narrow',sans-serif;--f-b:'IBM Plex Sans',system-ui,sans-serif;--f-m:'IBM Plex Mono',ui-monospace,monospace}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#0e1a2b;--panel:#142339;--ink:#e8eef7;--mute:#90a3bc;--line:#26395a;--accent:#4aa8ff;--dim:#f0a64a;--grid:rgba(74,168,255,.08);--shade:#1a2d49;--onaccent:#0e1a2b;color-scheme:dark}}
+:root[data-theme="dark"]{--bg:#0e1a2b;--panel:#142339;--ink:#e8eef7;--mute:#90a3bc;--line:#26395a;--accent:#4aa8ff;--dim:#f0a64a;--grid:rgba(74,168,255,.08);--shade:#1a2d49;--onaccent:#0e1a2b;color-scheme:dark}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font:15px/1.55 var(--f-b);padding-inline:max(16px,env(safe-area-inset-left,0px)) max(16px,env(safe-area-inset-right,0px));padding-block:0 48px;
+background-image:linear-gradient(var(--grid) 1px,transparent 1px),linear-gradient(90deg,var(--grid) 1px,transparent 1px);background-size:24px 24px}
+button{font:inherit;color:inherit;cursor:pointer}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.w{max-width:1280px;margin:0 auto}
+header{padding:36px 0 22px;display:flex;flex-wrap:wrap;gap:16px 32px;justify-content:space-between;align-items:end;border-bottom:2px solid var(--ink)}
+.eb{font:500 12px var(--f-m);letter-spacing:.14em;text-transform:uppercase;color:var(--accent)}
+h1{font:700 clamp(40px,7vw,72px)/.92 var(--f-d);text-transform:uppercase;margin:6px 0 0}
+.stamp{font:500 12px/1.7 var(--f-m);border:1px solid var(--ink);padding:10px 14px;background:var(--panel)}
+.stamp b{color:var(--dim);font-weight:500}
+.idbar{display:flex;flex-wrap:wrap;align-items:center;gap:10px 20px;padding:10px 0;border-bottom:1px solid var(--line)}
+.logochip{background:#fff;padding:8px 12px;border:1px solid var(--line);line-height:0}
+.logo{height:30px;width:auto;display:block}
+.idinfo{font:400 12px/1.5 var(--f-m);color:var(--mute);display:flex;flex-wrap:wrap;gap:2px 16px;min-width:0}
+.idinfo b{color:var(--ink);font-weight:500}
+.shell{display:grid;grid-template-columns:260px minmax(0,1fr);gap:28px;padding-top:24px;align-items:start}
+nav{position:sticky;top:12px;background:var(--panel);border:1px solid var(--ink);max-height:calc(100vh - 24px);overflow:auto}
+nav h3{font:500 11px var(--f-m);letter-spacing:.14em;text-transform:uppercase;margin:0;padding:8px 14px;background:var(--ink);color:var(--bg)}
+nav button{display:flex;width:100%;justify-content:space-between;align-items:baseline;gap:8px;text-align:left;background:none;border:0;border-top:1px solid var(--line);padding:9px 14px}
+nav button:first-of-type{border-top:0}
+nav button b{font:700 19px/1.1 var(--f-d);letter-spacing:.01em}
+nav button small{font:400 11px var(--f-m);color:var(--mute);white-space:nowrap}
+nav button:hover{background:var(--shade)}
+nav button[aria-current="true"]{background:var(--accent);color:var(--onaccent)}
+nav button[aria-current="true"] small{color:var(--onaccent)}
+main{min-width:0;display:flex;flex-direction:column;gap:24px}
+.ph{display:flex;flex-wrap:wrap;gap:8px 24px;justify-content:space-between;align-items:end}
+.ph h2{font:700 clamp(34px,5vw,52px)/1 var(--f-d);text-transform:uppercase;margin:0}
+.ph p{margin:6px 0 0;color:var(--mute);max-width:62ch}
+.qty{font:500 12px var(--f-m);border:1px solid var(--ink);padding:6px 12px;background:var(--panel);white-space:nowrap}
+.lbl{font:500 11px var(--f-m);letter-spacing:.14em;text-transform:uppercase;color:var(--accent);margin:0 0 8px}
+.sheet{margin:0;background:#fff;border:1px solid var(--ink);position:relative}
+.sheet img{display:block;width:100%;height:auto;cursor:zoom-in}
+.sheet figcaption{position:absolute;right:8px;top:8px;font:500 11px var(--f-m);background:var(--ink);color:var(--bg);padding:3px 8px;letter-spacing:.08em;text-transform:uppercase}
+.meds{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));border:1px solid var(--ink);background:var(--panel)}
+.meds div{padding:12px 16px;border-right:1px solid var(--line);border-bottom:1px solid var(--line);margin:0 -1px -1px 0}
+.meds small{display:block;font:500 11px var(--f-m);letter-spacing:.1em;text-transform:uppercase;color:var(--mute)}
+.meds strong{font:700 24px/1.2 var(--f-d);color:var(--dim)}
+.viewer{background:var(--panel);border:1px solid var(--ink)}
+.tabs{display:flex;flex-wrap:wrap;border-bottom:1px solid var(--ink)}
+.tabs button{background:none;border:0;border-right:1px solid var(--line);padding:9px 16px;font:500 12px var(--f-m);letter-spacing:.06em;text-transform:uppercase}
+.tabs button[aria-pressed="true"]{background:var(--ink);color:var(--bg)}
+.stage{position:relative;background:#262f3e;line-height:0}
+.stage img{width:100%;height:auto;display:block}
+.hs{position:absolute;transform:translate(-50%,-50%);min-width:26px;height:26px;padding:0 7px;border-radius:13px;background:var(--panel);color:var(--ink);border:2px solid var(--accent);font:500 11px/22px var(--f-m);white-space:nowrap;box-shadow:0 1px 6px rgba(0,0,0,.5)}
+.hs:hover{background:var(--accent);color:var(--onaccent);z-index:3}
+.hs.on{background:var(--dim);border-color:var(--dim);color:#111;z-index:2;animation:p 1.6s ease-out infinite}
+.stage.sel .hs:not(.on){opacity:.55}
+@keyframes p{0%{box-shadow:0 0 0 0 var(--dim)}100%{box-shadow:0 0 0 14px transparent}}
+@media (prefers-reduced-motion:reduce){.hs.on{animation:none}}
+.chips{display:flex;flex-wrap:wrap;gap:6px;padding:10px 12px;border-top:1px solid var(--ink)}
+.chips button{background:var(--shade);border:1px solid var(--line);padding:4px 10px;font:500 12px var(--f-m)}
+.chips button:hover{border-color:var(--accent)}
+.chips button[aria-current="true"]{background:var(--dim);color:#111;border-color:var(--dim)}
+.hint{font:400 12px var(--f-m);color:var(--mute);padding:8px 12px;border-top:1px solid var(--line)}
+.tw{overflow-x:auto;border:1px solid var(--ink);background:var(--panel)}
+table{border-collapse:collapse;width:100%;min-width:640px}
+th{font:500 11px var(--f-m);letter-spacing:.1em;text-transform:uppercase;text-align:left;background:var(--ink);color:var(--bg);padding:9px 14px}
+td{padding:9px 14px;border-top:1px solid var(--line);vertical-align:top}
+td button{background:none;border:0;padding:0;font:700 20px/1.1 var(--f-d);color:var(--accent);text-align:left;text-decoration:underline;text-underline-offset:3px}
+td.m{font:400 12px/1.6 var(--f-m)}
+tr:nth-child(even) td{background:var(--shade)}
+#zoom{position:fixed;inset:0;z-index:50;background:rgba(5,10,18,.92);overflow:auto;padding:16px;cursor:zoom-out}
+#zoom img{display:block;width:max(100%,1500px);height:auto;background:#fff;margin:0 auto}
+#zoom[hidden]{display:none}
+footer{margin-top:36px;padding-top:12px;border-top:2px solid var(--ink);font:500 12px var(--f-m);color:var(--mute)}
+@media(max-width:900px){.shell{grid-template-columns:1fr}nav{position:static;max-height:none;display:flex;overflow-x:auto}nav h3{display:none}nav button{width:auto;flex:none;border-top:0;border-right:1px solid var(--line);flex-direction:column;gap:0;align-items:flex-start}}
+</style>
+<div class="w">
+<div class="idbar"><div class="logochip"><svg role="img" aria-label="Universidade Anhembi Morumbi" class="logo" width="169" height="30" viewBox="0 0 169 30" fill="none" xmlns="http://www.w3.org/2000/svg">
+<path d="M12.608 6.79166H12.7181L15.2185 14.926H20.5857L16.5788 2.17477C16.2847 1.22947 15.5865 0.926758 14.7747 0.926758H10.5513C9.74131 0.926758 9.04313 1.22947 8.74726 2.17477L4.74219 14.926H10.1075L12.608 6.79166Z" fill="#00796A"/>
+<path d="M20.8041 15.7588H15.1447L12.7182 20.6023H12.6081L10.1834 15.7588H4.52402L0.0390625 29.2659H5.58843L8.08709 21.4343L10.9917 26.2387C11.1378 26.4244 11.2839 26.5414 11.8378 26.5414H13.5282C14.0694 26.5414 14.2264 26.43 14.3725 26.2387L17.2446 21.4343L19.7451 29.2659H25.2945L20.8041 15.7588Z" fill="#00AD8E"/>
+<path fill-rule="evenodd" clip-rule="evenodd" d="M41.6645 13.3958C44.0874 13.3958 46.2288 12.2258 46.2288 8.64892V0.984431H43.9467V8.75292C43.9467 10.7364 43.189 11.4328 41.6573 11.4328C40.1256 11.4328 39.3751 10.7345 39.3751 8.75292V0.984431H37.102V8.65078C37.102 12.2277 39.2434 13.3958 41.6645 13.3958ZM53.1818 4.24003C52.1769 4.24003 51.3055 4.81761 50.546 5.35432V4.40903H48.668V13.2287H50.712V6.86977C50.9496 6.58594 51.2424 6.35663 51.5715 6.19667C51.9006 6.03671 52.2587 5.94968 52.6225 5.94119C53.3153 5.94119 53.6779 6.31262 53.6779 7.5012V13.2287H55.7201V7.19105C55.7201 5.39332 54.8957 4.24003 53.1818 4.24003ZM60.0878 0.81543H58.0438V2.7803H60.0878V0.81543ZM60.0878 4.40903H58.0438V13.2287H60.0878V4.40903ZM66.0521 13.2287L68.5075 4.40903H66.4653L65.022 10.3798H64.9877L63.5715 4.40903H61.5221L63.9107 13.2287H66.0521ZM72.693 13.3977C74.3401 13.3977 75.4929 12.8554 76.2831 11.5999L74.7965 10.6509C74.286 11.2601 73.8386 11.7021 72.886 11.7021C71.9334 11.7021 71.1378 10.9889 71.1054 9.15778H76.2777V8.29421C76.2777 6.17519 75.0275 4.22146 72.785 4.24003C70.4631 4.24003 69.0631 6.02104 69.0631 8.81978C69.0631 11.6185 70.4667 13.3958 72.693 13.3958V13.3977ZM72.7579 5.80004C73.7466 5.80004 74.3726 6.51319 74.405 7.73334H71.1108C71.1433 6.51319 71.7693 5.80004 72.7579 5.80004ZM79.8768 7.86892C79.8768 7.64977 80.7662 6.44448 81.7874 6.44448C81.9079 6.44053 82.0285 6.44612 82.1482 6.46119V4.2326C80.9286 4.26603 80.2358 4.86032 79.7433 5.90404H79.709V4.40903H77.8328V13.2287H79.875L79.8768 7.86892ZM86.1226 11.8377C85.2494 11.8377 84.6053 11.2452 84.1273 10.5674L82.7598 11.6167C83.1085 12.1741 83.5899 12.6304 84.1583 12.9421C84.7267 13.2539 85.3632 13.4107 86.0071 13.3977C87.8112 13.3977 89.1552 12.5842 89.1552 10.7512C89.1552 7.53091 84.8705 8.17535 84.8705 6.66548C84.8705 6.1399 85.2314 5.80004 86.0252 5.80004C86.6674 5.80004 87.2104 6.27547 87.6218 6.72862L88.9081 5.57533C88.1666 4.67646 87.0282 4.23446 85.8917 4.23446C84.4105 4.23446 83.0592 5.15004 83.0592 6.79548C83.0592 9.86536 87.3421 9.32307 87.3421 10.8311C87.3403 11.4309 86.846 11.8377 86.1226 11.8377ZM93.025 4.40903H90.9828V13.2287H93.0178L93.025 4.40903ZM93.025 0.81543H90.9828V2.78216H93.0178L93.025 0.81543ZM98.2496 13.3958C99.1733 13.3958 99.8481 13.0058 100.573 12.2815L100.673 13.2324H102.399V0.984431H100.357V5.22432H100.324C99.913 4.66718 98.9388 4.24003 98.2478 4.24003C96.0414 4.24003 94.8201 6.41105 94.8201 8.58207C94.8219 11.3288 95.9747 13.3958 98.2496 13.3958ZM98.7764 5.93376C99.4367 5.93376 99.9473 6.29033 100.359 6.67662V10.9165C99.931 11.2545 99.6496 11.6965 98.7764 11.6965C97.5587 11.6965 96.8659 10.6788 96.8659 8.81421C96.8659 6.94962 97.5569 5.93562 98.7746 5.93562L98.7764 5.93376ZM108.879 13.2268H110.878C110.756 12.815 110.7 12.3851 110.714 11.9547V7.80206C110.714 5.15561 109.725 4.29203 107.418 4.24003C106.168 4.2066 104.75 4.91789 104.223 5.85204L105.54 6.88648C105.935 6.32933 106.464 5.80004 107.418 5.80004C108.14 5.80004 108.681 6.17147 108.681 6.85119V7.59406C105.334 8.01006 103.752 9.05564 103.752 11.0558C103.752 12.2611 104.526 13.3977 106.074 13.3977C107.146 13.3977 107.92 13.043 108.744 12.4691L108.879 13.2268ZM108.666 10.9035C108.237 11.2749 107.431 11.8321 106.788 11.8321C106.211 11.8321 105.8 11.4607 105.8 10.7977C105.8 9.55893 107.299 9.27107 108.666 8.99993V10.9035ZM115.648 13.3958C116.57 13.3958 117.247 13.0058 117.97 12.2815L118.069 13.2324H119.801V0.984431H117.757V5.22432H117.734C117.321 4.66718 116.35 4.24003 115.657 4.24003C113.449 4.24003 112.229 6.41105 112.229 8.58207C112.222 11.3288 113.375 13.3958 115.648 13.3958ZM116.177 5.93376C116.834 5.93376 117.344 6.29033 117.757 6.67662V10.9165C117.328 11.2545 117.048 11.6965 116.177 11.6965C114.955 11.6965 114.265 10.6788 114.265 8.81421C114.265 6.94962 114.955 5.93562 116.177 5.93562V5.93376ZM126.985 10.6491C126.475 11.2582 126.029 11.7002 125.073 11.7002C124.117 11.7002 123.326 10.9815 123.294 9.15778H128.468V8.29421C128.468 6.17519 127.216 4.22146 124.975 4.24003C122.652 4.24003 121.252 6.02104 121.252 8.81978C121.252 11.6185 122.652 13.3958 124.876 13.3958C126.523 13.3958 127.678 12.8535 128.468 11.5981L126.985 10.6491ZM124.95 5.80004C125.937 5.80004 126.563 6.51319 126.597 7.73334H123.294C123.326 6.51319 123.954 5.80004 124.95 5.80004ZM39.7612 26.3959H43.5191L44.1758 29.0405H46.4345L43.0591 16.7833H40.2248L36.7971 29.0405H39.054L39.7612 26.3959ZM41.6573 19.1363H41.6898L43.023 24.4626H40.2573L41.6573 19.1363ZM50.1365 22.6816C50.3738 22.3979 50.6663 22.1687 50.9951 22.0087C51.3239 21.8488 51.6816 21.7617 52.0452 21.753C52.738 21.753 53.1006 22.1245 53.1006 23.3149V29.0461H55.132V22.9936C55.132 21.1959 54.3093 20.0426 52.5955 20.0426C51.5906 20.0426 50.7174 20.6202 49.9597 21.1569V20.2079H48.0852V29.0257H50.1293L50.1365 22.6816ZM59.2814 22.6816C59.5195 22.3979 59.8126 22.1687 60.142 22.0088C60.4714 21.8488 60.8297 21.7617 61.1937 21.753C61.8847 21.753 62.2473 22.1245 62.2473 23.3149V29.0461H64.2968V22.9936C64.2968 21.1959 63.4741 20.0426 61.7602 20.0426C60.7553 20.0426 59.9164 20.6202 59.2886 21.1569V16.787H57.2464V29.0312H59.2814V22.6816ZM69.4637 20.0519C67.1418 20.0519 65.7418 21.8329 65.7418 24.6316C65.7418 27.4304 67.1418 29.2095 69.3644 29.2095C71.0134 29.2095 72.1662 28.6672 72.9564 27.4118L71.4752 26.4628C70.9719 27.0645 70.5263 27.5102 69.5647 27.5102C68.6031 27.5102 67.8183 26.7971 67.7859 24.9641H72.9564V24.1005C72.9636 21.9759 71.7133 20.0259 69.4709 20.0426L69.4637 20.0519ZM67.7859 23.547C67.8183 22.325 68.4425 21.6119 69.4312 21.6137C70.4198 21.6156 71.0458 22.325 71.0783 23.547H67.7859ZM79.424 22.8673V29.0238H81.4716V22.6816C81.9515 22.2247 82.6587 21.7307 83.1855 21.7307C83.927 21.766 84.2066 22.156 84.2066 22.8673V29.0238H86.2489V22.6816C86.2489 20.5774 85.0311 20.0352 84.1417 20.0352C82.7255 20.0352 81.901 20.5923 81.1938 21.324C80.8132 20.4772 79.9742 20.0352 79.0848 20.0352C77.914 20.0352 77.2898 20.427 76.514 21.1495V20.2004H74.6468V29.0182H76.689V22.6816C77.1671 22.2247 77.8761 21.7307 78.4029 21.7307C79.1444 21.7735 79.424 22.1635 79.424 22.8673ZM88.3723 16.7796V29.0238H89.9707L90.2016 28.0729C90.9232 28.8028 91.6016 29.1872 92.5235 29.1872C94.7984 29.1872 95.9512 27.1184 95.9512 24.3716C95.9512 22.2006 94.7317 20.0296 92.5235 20.0296C91.8325 20.0296 90.8601 20.4549 90.4488 21.0139H90.4145V16.787L88.3723 16.7796ZM91.9967 21.7307C93.2162 21.7307 93.9072 22.7485 93.9072 24.6149C93.9072 26.4814 93.2162 27.5102 91.9967 27.5102C91.1235 27.5102 90.8439 27.0682 90.4145 26.7284V22.4959C90.8276 22.0947 91.3382 21.7382 91.9967 21.7382V21.7307ZM99.4115 16.6106H97.3674V18.5773H99.4115V16.6106ZM97.3674 29.0238H99.4115V20.2134H97.3674V29.0238ZM109.289 19.3926H109.321L111.961 29.0312H113.689L116.357 19.4H116.393V29.0312H118.378V16.787H115.148L112.843 25.3299H112.809L110.519 16.787H107.313V29.0312H109.298L109.289 19.3926ZM123.823 20.0352C121.497 20.0352 120.097 21.8162 120.097 24.6149C120.097 27.4137 121.497 29.1928 123.823 29.1928C126.148 29.1928 127.544 27.4118 127.544 24.6149C127.544 21.818 126.143 20.0426 123.823 20.0426V20.0352ZM123.823 27.4991C122.686 27.4991 122.141 26.5816 122.141 24.6149C122.141 22.6482 122.682 21.7307 123.823 21.7307C124.963 21.7307 125.502 22.6482 125.502 24.6149C125.502 26.5816 124.959 27.5102 123.823 27.5102V27.4991ZM130.775 21.7159H130.743V20.206H128.865V29.0238H130.904V23.6733C130.904 23.4523 131.791 22.2489 132.812 22.2489C132.933 22.2454 133.053 22.2503 133.173 22.2638V20.0352C131.963 20.0816 131.264 20.6703 130.775 21.7233V21.7159ZM137.021 29.1928C138.024 29.1928 138.897 28.6171 139.655 28.0785V29.0294H141.535V20.2134H139.491V26.5816C139.253 26.8656 138.96 27.095 138.631 27.2549C138.301 27.4149 137.943 27.5019 137.579 27.5102C136.886 27.5102 136.523 27.1388 136.523 25.9484V20.2134H134.483V26.2511C134.483 28.0469 135.307 29.2002 137.021 29.2002V29.1928ZM153.133 20.0352C151.717 20.0352 150.893 20.5923 150.186 21.324C149.805 20.4772 148.968 20.0352 148.077 20.0352C146.908 20.0352 146.273 20.427 145.506 21.1495V20.2004H143.646V29.0182H145.697V22.6816C146.173 22.2247 146.882 21.7307 147.409 21.7307C148.151 21.766 148.432 22.156 148.432 22.8673V29.0238H150.474V22.6816C150.952 22.2247 151.661 21.7307 152.188 21.7307C152.93 21.766 153.207 22.156 153.207 22.8673V29.0238H155.252V22.6816C155.242 20.5849 154.025 20.0426 153.133 20.0426V20.0352ZM159.199 28.0729C159.92 28.8028 160.601 29.1872 161.522 29.1872C163.796 29.1872 164.95 27.1184 164.95 24.3716C164.95 22.2006 163.731 20.0296 161.522 20.0296C160.83 20.0296 159.857 20.4549 159.446 21.0139H159.408V16.787H157.371V29.0312H158.97L159.199 28.0729ZM159.408 22.4959C159.819 22.104 160.332 21.753 160.99 21.753C162.208 21.753 162.901 22.7708 162.901 24.6372C162.901 26.5036 162.213 27.5102 160.996 27.5102C160.121 27.5102 159.843 27.0682 159.414 26.7284L159.408 22.4959ZM168.789 16.6273H166.747V18.594H168.789V16.6273ZM168.789 20.2227H166.747V29.0405H168.789V20.2227ZM30.6055 29.3024H30.8797V0.92686H30.6055V29.3024Z" fill="#3F3F3F"/>
+</svg>
+</div>
+ <div class="idinfo"><span><b>Aluno:</b> Bruno Ribeiro Madela</span><span><b>RA:</b> 12526146501</span><span><b>Curso:</b> Engenharia de Software</span><span><b>UC:</b> Medição em Ciências e Representação Gráfica</span><span><b>Anhembi Morumbi</b> - Av. Paulista</span></div></div>
+<header>
+ <div><div class="eb">Autodesk Inventor 2027 · Desenhos técnicos A3</div><h1>Redutor de Velocidade</h1></div>
+ <div class="stamp">RELAÇÃO <b>4 : 1</b> (2 × 2:1) · MÓDULO <b>1,5 mm</b> · 20°<br>CONJUNTO <b>180 × 100 × 90 mm</b></div>
+</header>
+<div class="shell">
+ <nav id="menu" aria-label="Peças"></nav>
+ <main id="main"></main>
+</div>
+<footer>Selecione uma peça no menu ou clique em um marcador na vista da montagem. Toque na folha para ampliar.</footer>
+</div>
+<div id="zoom" hidden><img alt="Folha ampliada" id="zimg"></div>
+<script>
+var IMG={iso:'img/Redutor_aberto_isometrica.png',top:'img/Redutor_aberto_planta.png',full:'img/Redutor_completo_isometrica.png',Carcaca_inferior:'img/folha_Carcaca_inferior.png',Tampa_superior:'img/folha_Tampa_superior.png',E1:'img/folha_E1.png',E2:'img/folha_E2.png',E3:'img/folha_E3.png',G1:'img/folha_G1.png',G2:'img/folha_G2.png',G3:'img/folha_G3.png',G4:'img/folha_G4.png',Rolamento_6001:'img/folha_Rolamento_6001.png',Rolamento_6002:'img/folha_Rolamento_6002.png',Parafuso_M6x25:'img/folha_Parafuso_M6x25.png',Montagem_Redutor:'img/folha_Montagem_Redutor.png',Montagem_Redutor_Aberto:'img/folha_Montagem_Redutor_Aberto.png'};
+var VIEWS={
+ iso:{n:'Montagem aberta · isométrica',img:'iso',pins:{g1:[[32.5,35]],g2:[[45.6,41.7]],g3:[[55.6,35]],g4:[[66.7,43.3]],e1:[[27.2,45.4]],e2:[[40.8,54.2]],e3:[[54.7,60.4]],r6001:[[30.6,41.7],[41.4,29.2]],r6002:[[43.9,49.2],[56.1,35.4],[57.8,56.3]],carcaca:[[16.7,66.7]]}},
+ top:{n:'Montagem aberta · planta',img:'top',pins:{e1:[[26.4,21.7]],e2:[[50,22.5]],e3:[[73.4,22.5]],g1:[[26.4,59.2]],g2:[[50,58.7]],g3:[[44.4,41.3]],g4:[[77.8,41.3]],r6001:[[26.4,29.6],[26.4,70.4]],r6002:[[50,30],[73.4,30],[50,70],[73.4,70]],carcaca:[[7.2,50]]}},
+ full:{n:'Montagem completa · isométrica',img:'full',pins:{parafuso:[[40,9.6],[78.9,31.3]],tampa:[[55.6,25]],carcaca:[[38.9,70.8]]}}
+};
+var P=[
+{id:'carcaca',g:'Estrutura',n:'Carcaça inferior',s:'180×100×55',q:1,img:'Carcaca_inferior',d:'Base do redutor. Recebe os eixos e os rolamentos e guarda o conjunto de engrenagens.',m:[['Comprimento','180 mm'],['Largura','100 mm'],['Altura','55 mm'],['Paredes e fundo','10 mm'],['Cavidade','160 × 80 × 45 mm'],['Alojamentos','2× Ø28×8 · 4× Ø32×9'],['Furos','8× Ø6,5 mm']]},
+{id:'tampa',g:'Estrutura',n:'Tampa superior',s:'180×100×35',q:1,img:'Tampa_superior',d:'Fecha a carcaça por cima e protege as engrenagens.',m:[['Comprimento','180 mm'],['Largura','100 mm'],['Altura','35 mm'],['Paredes e topo','10 mm'],['Cavidade','160 × 80 × 25 mm'],['Furos','8× Ø6,5 mm']]},
+{id:'parafuso',g:'Estrutura',n:'Parafuso M6 × 25',s:'M6×25',q:8,img:'Parafuso_M6x25',d:'Une a tampa à carcaça. Rosca métrica de 6 mm e 25 mm de comprimento.',m:[['Rosca','M6'],['Comprimento','25 mm'],['Cabeça','sextavada · 4 mm'],['Quantidade','8']]},
+{id:'e1',g:'Eixos',n:'Eixo E1',s:'80 mm',q:1,img:'E1',d:'Eixo de entrada. Recebe o movimento do motor e carrega a engrenagem G1.',m:[['Comprimento total','80 mm'],['Pontas','Ø10 · 10 mm cada'],['Assentos de rolamento','Ø12 · 8 mm cada'],['Região da G1','Ø12 · 20 mm'],['Região central','Ø12 · 24 mm']]},
+{id:'e2',g:'Eixos',n:'Eixo E2',s:'80 mm',q:1,img:'E2',d:'Eixo intermediário. Leva G2 e G3 e passa o movimento da 1ª para a 2ª etapa.',m:[['Comprimento total','80 mm'],['Pontas','Ø12 · 10 mm cada'],['Assentos de rolamento','Ø15 · 9 mm cada'],['Regiões G2 e G3','Ø15 · 20 mm cada'],['Espaçador','Ø15 · 2 mm']]},
+{id:'e3',g:'Eixos',n:'Eixo E3',s:'80 mm',q:1,img:'E3',d:'Eixo de saída. Carrega G4 e entrega a rotação já reduzida.',m:[['Comprimento total','80 mm'],['Pontas','Ø12 · 10 mm cada'],['Assentos de rolamento','Ø15 · 9 mm cada'],['Região da G4','Ø15 · 20 mm'],['Região central','Ø15 · 22 mm']]},
+{id:'g1',g:'Engrenagens',n:'Engrenagem G1',s:'Z20',q:1,img:'G1',d:'Pinhão da 1ª etapa, montado no E1. Aciona a G2.',m:[['Dentes','20'],['Módulo / ângulo','1,5 mm / 20°'],['Ø primitivo','30 mm'],['Ø externo','33 mm'],['Furo','Ø12 mm'],['Cubo','Ø20 × 20 mm'],['Parte dentada','15 mm']]},
+{id:'g2',g:'Engrenagens',n:'Engrenagem G2',s:'Z40',q:1,img:'G2',d:'Coroa da 1ª etapa, montada no E2. Reduz a rotação 2:1.',m:[['Dentes','40'],['Módulo / ângulo','1,5 mm / 20°'],['Ø primitivo','60 mm'],['Ø externo','63 mm'],['Furo','Ø15 mm'],['Cubo','Ø25 × 20 mm'],['Parte dentada','15 mm']]},
+{id:'g3',g:'Engrenagens',n:'Engrenagem G3',s:'Z20',q:1,img:'G3',d:'Pinhão da 2ª etapa, no mesmo eixo da G2. Aciona a G4.',m:[['Dentes','20'],['Módulo / ângulo','1,5 mm / 20°'],['Ø primitivo','30 mm'],['Ø externo','33 mm'],['Furo','Ø15 mm'],['Cubo','Ø20 × 20 mm'],['Parte dentada','15 mm']]},
+{id:'g4',g:'Engrenagens',n:'Engrenagem G4',s:'Z40',q:1,img:'G4',d:'Coroa da 2ª etapa, montada no E3. Entrega a redução final.',m:[['Dentes','40'],['Módulo / ângulo','1,5 mm / 20°'],['Ø primitivo','60 mm'],['Ø externo','63 mm'],['Furo','Ø15 mm'],['Cubo','Ø25 × 20 mm'],['Parte dentada','15 mm']]},
+{id:'r6001',g:'Rolamentos',n:'Rolamento 6001',s:'Ø12×28×8',q:2,img:'Rolamento_6001',d:'Rolamento rígido de esferas que apoia o eixo E1 e deixa o eixo girar com pouco atrito.',m:[['Furo','Ø12 mm'],['Ø externo','Ø28 mm'],['Largura','8 mm'],['Quantidade','2']]},
+{id:'r6002',g:'Rolamentos',n:'Rolamento 6002',s:'Ø15×32×9',q:4,img:'Rolamento_6002',d:'Rolamento rígido de esferas que apoia os eixos E2 e E3.',m:[['Furo','Ø15 mm'],['Ø externo','Ø32 mm'],['Largura','9 mm'],['Quantidade','4']]},
+{id:'mont',g:'Montagens',n:'Montagem aberta',s:'tampa oculta',q:1,img:'Montagem_Redutor_Aberto',d:'Conjunto com a tampa oculta, mostrando eixos, engrenagens e rolamentos.',view:'iso',m:[['Comprimento','180 mm'],['Largura','100 mm'],['Entre eixos','45 + 45 mm'],['Eixos','E1, E2, E3'],['Engrenagens','G1 a G4']]},
+{id:'conj',g:'Montagens',n:'Montagem completa',s:'180×100×90',q:1,img:'Montagem_Redutor',d:'Redutor fechado, com a tampa e os 8 parafusos M6.',view:'full',m:[['Comprimento','180 mm'],['Largura','100 mm'],['Altura','90 mm'],['Cabeça dos parafusos','+4 mm'],['Redução total','4 : 1']]}
+];
+var byId={};P.forEach(function(p){byId[p.id]=p});
+var menu=document.getElementById('menu'),main=document.getElementById('main'),cur=null,curView='iso';
+function el(t,c,h){var e=document.createElement(t);if(c)e.className=c;if(h!=null)e.innerHTML=h;return e}
+function buildMenu(){menu.innerHTML='';var g='';
+ var home=el('button',null,'<b>Visão geral</b><small>montagem</small>');home.dataset.id='home';home.onclick=function(){go('home')};menu.appendChild(home);
+ P.forEach(function(p){if(p.g!==g){g=p.g;menu.appendChild(el('h3',null,g))}
+  var b=el('button',null,'<b>'+p.n+'</b><small>'+p.s+'</small>');b.dataset.id=p.id;b.onclick=function(){go(p.id)};menu.appendChild(b)})}
+function mark(){menu.querySelectorAll('button').forEach(function(b){b.setAttribute('aria-current',b.dataset.id===(cur||'home')?'true':'false')})}
+function viewer(sel){
+ var box=el('div','viewer'),tabs=el('div','tabs'),stage=el('div','stage'),chips=el('div','chips');
+ if(sel&&VIEWS[curView]&&!VIEWS[curView].pins[sel]){for(var k in VIEWS){if(VIEWS[k].pins[sel]){curView=k;break}}}
+ Object.keys(VIEWS).forEach(function(k){var b=el('button',null,VIEWS[k].n);b.setAttribute('aria-pressed',k===curView);
+  b.onclick=function(){curView=k;render(cur,true)};tabs.appendChild(b)});
+ var V=VIEWS[curView];stage.appendChild(Object.assign(el('img'),{src:IMG[V.img],alt:V.n}));
+ if(sel)stage.classList.add('sel');
+ Object.keys(V.pins).forEach(function(id){V.pins[id].forEach(function(xy){
+  var h=el('button','hs'+(id===sel?' on':''),byId[id].n.replace('Engrenagem ','').replace('Rolamento ','').replace('Eixo ','').replace('Carcaça inferior','Carcaça').replace('Tampa superior','Tampa').replace('Parafuso M6 × 25','M6'));
+  h.style.left=xy[0]+'%';h.style.top=xy[1]+'%';h.title=byId[id].n;h.setAttribute('aria-label','Abrir '+byId[id].n);h.onclick=function(){go(id)};stage.appendChild(h)})});
+ P.forEach(function(p){if(!V.pins[p.id])return;var c=el('button',null,p.n);c.setAttribute('aria-current',p.id===sel);c.onclick=function(){go(p.id)};chips.appendChild(c)});
+ box.appendChild(tabs);box.appendChild(stage);box.appendChild(chips);
+ box.appendChild(el('div','hint',sel&&!V.pins[sel]?'Esta peça não aparece nesta vista.':'Posições dos marcadores aproximadas. Clique para abrir a peça.'));
+ return box}
+function render(id,keep){
+ cur=id;mark();main.innerHTML='';var p=byId[id];
+ if(!p){main.appendChild(el('div','ph','<div><div class="eb">Visão geral</div><h2>Montagem do redutor</h2><p>Troque a vista e clique em uma peça para abrir a folha do desenho, as medidas e o significado.</p></div>'));
+  main.appendChild(viewer(null));
+  var t=el('div','tw'),h='<table><thead><tr><th>Peça</th><th>Qtd.</th><th>Resumo</th></tr></thead><tbody>';
+  P.forEach(function(q){h+='<tr><td><button data-id="'+q.id+'">'+q.n+'</button></td><td>'+q.q+'</td><td class="m">'+q.m.slice(0,3).map(function(x){return x[0]+' '+x[1]}).join(' · ')+'</td></tr>'});
+  t.innerHTML=h+'</tbody></table>';t.querySelectorAll('button').forEach(function(b){b.onclick=function(){go(b.dataset.id)}});main.appendChild(t);return}
+ if(p.view&&!keep)curView=p.view;
+ main.appendChild(el('div','ph','<div><div class="eb">'+p.g+'</div><h2>'+p.n+'</h2><p>'+p.d+'</p></div><div class="qty">Quantidade: '+p.q+'</div>'));
+ var f=el('figure','sheet','<img alt="Folha do desenho de '+p.n+'" src="'+IMG[p.img]+'"><figcaption>Folha A3 · '+p.n+'</figcaption>');
+ f.querySelector('img').onclick=function(){document.getElementById('zimg').src=IMG[p.img];document.getElementById('zoom').hidden=false};
+ var a=el('div');a.appendChild(el('p','lbl','Desenho técnico · <a href="pdf/Desenho_'+p.img+'.pdf" target="_blank" rel="noopener" style="color:var(--accent)">abrir PDF</a>'));a.appendChild(f);main.appendChild(a);
+ var m=el('div');m.appendChild(el('p','lbl','Medidas'));var g=el('div','meds');p.m.forEach(function(x){g.appendChild(el('div',null,'<small>'+x[0]+'</small><strong>'+x[1]+'</strong>'))});m.appendChild(g);main.appendChild(m);
+ var v=el('div');v.appendChild(el('p','lbl','Onde fica na montagem'));v.appendChild(viewer(p.id));main.appendChild(v)}
+function go(id){if(location.hash!=='#'+id)location.hash=id;else render(id==='home'?null:id)}
+window.addEventListener('hashchange',function(){var h=location.hash.slice(1);curView=curView;render(byId[h]?h:null)});
+document.getElementById('zoom').onclick=function(){this.hidden=true};
+document.addEventListener('keydown',function(e){if(e.key==='Escape')document.getElementById('zoom').hidden=true});
+buildMenu();var h0=location.hash.slice(1);render(byId[h0]?h0:null);
+</script>
